@@ -1,102 +1,40 @@
 import { useState } from 'react';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  Plus,
-  Search,
-  SlidersHorizontal,
-  TrendingUp,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Plus, Search } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { LeadRow } from '../components/LeadRow';
-import type { Lead } from '../components/LeadRow';
+import { leadsQueryOptions } from '../query-options/leads-options';
+import { LEADS_PAGE_SIZE } from '../services/leads';
+import { useDebounce } from '#/hooks/use-debounce';
 import { Button } from '#/components/ui/button';
 import { Input } from '#/components/ui/input';
-
-const mockLeads: Lead[] = [
-  {
-    id: '1',
-    nombre: 'Alejandra Martinez',
-    email: 'ale.martinez@email.com',
-    interesAcademico: 'Maestria en IA',
-    fecha: '12 Oct, 2024',
-    estado: 'nuevo',
-  },
-  {
-    id: '2',
-    nombre: 'Ricardo Gomez',
-    email: 'r.gomez22@university.edu',
-    interesAcademico: 'Diplomado en Finanzas',
-    fecha: '11 Oct, 2024',
-    estado: 'contactado',
-  },
-  {
-    id: '3',
-    nombre: 'Catalina Pardo',
-    email: 'cpardo_dev@workmail.co',
-    interesAcademico: 'Ingenieria de Datos',
-    fecha: '10 Oct, 2024',
-    estado: 'inscrito',
-  },
-  {
-    id: '4',
-    nombre: 'Sebastian Rojas',
-    email: 's.rojas@gmail.com',
-    interesAcademico: 'MBA Ejecutivo',
-    fecha: '9 Oct, 2024',
-    estado: 'nuevo',
-  },
-  {
-    id: '5',
-    nombre: 'Valentina Castro',
-    email: 'vcastro@outlook.com',
-    interesAcademico: 'Especializacion en UX',
-    fecha: '8 Oct, 2024',
-    estado: 'rechazado',
-  },
-  {
-    id: '6',
-    nombre: 'Andres Mejia',
-    email: 'amejia@empresa.co',
-    interesAcademico: 'Maestria en IA',
-    fecha: '7 Oct, 2024',
-    estado: 'contactado',
-  },
-  {
-    id: '7',
-    nombre: 'Laura Fernandez',
-    email: 'lfernandez@correo.com',
-    interesAcademico: 'Diplomado en Finanzas',
-    fecha: '6 Oct, 2024',
-    estado: 'inscrito',
-  },
-  {
-    id: '8',
-    nombre: 'Carlos Duarte',
-    email: 'cduarte@mail.com',
-    interesAcademico: 'Ingenieria de Datos',
-    fecha: '5 Oct, 2024',
-    estado: 'nuevo',
-  },
-];
-
-const ITEMS_PER_PAGE = 5;
+import { Skeleton } from '#/components/ui/skeleton';
 
 export function LeadsPage() {
   const [search, setSearch] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const debouncedSearch = useDebounce(search);
+  const [currentPage, setCurrentPage] = useState(0);
 
-  const filtered = mockLeads.filter(
-    (lead) =>
-      lead.nombre.toLowerCase().includes(search.toLowerCase()) ||
-      lead.email.toLowerCase().includes(search.toLowerCase())
+  const { data, isLoading, isFetching } = useQuery(
+    leadsQueryOptions(debouncedSearch, currentPage),
   );
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const leads = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.ceil(total / LEADS_PAGE_SIZE);
+  const isFiltering = isFetching && !isLoading;
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setCurrentPage(0);
+  };
+
+  const handleEdit = (id: string) => {
+    console.log('Edit lead:', id);
+  };
+
+  const handleDelete = (id: string) => {
+    console.log('Delete lead:', id);
+  };
 
   return (
     <div className="space-y-6">
@@ -121,26 +59,19 @@ export function LeadsPage() {
       </div>
 
       {/* Stats + Banner */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl border bg-card p-5 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Total Aspirantes
           </p>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-heading text-3xl font-bold">1,248</span>
-            <span className="flex items-center gap-0.5 text-xs font-medium text-emerald-600">
-              <TrendingUp className="size-3" /> 12%
-            </span>
-          </div>
-        </div>
-
-        <div className="rounded-xl border bg-card p-5 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Por Contactar
-          </p>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-heading text-3xl font-bold">42</span>
-            <span className="text-xs text-muted-foreground">Pendiente</span>
+          <div className="mt-2">
+            {isLoading ? (
+              <Skeleton className="h-9 w-24" />
+            ) : (
+              <span className="font-heading text-3xl font-bold">
+                {total.toLocaleString('es-CO')}
+              </span>
+            )}
           </div>
         </div>
 
@@ -152,29 +83,20 @@ export function LeadsPage() {
         </div>
       </div>
 
-      {/* Search + Filter */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-sm flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nombre o correo..."
-            className="pl-9"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-        </div>
-        <Button variant="outline" size="sm">
-          <SlidersHorizontal className="size-4" />
-          Todos los Programas
-        </Button>
+      {/* Search */}
+      <div className="relative max-w-sm">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por nombre o correo..."
+          className="pl-9"
+          value={search}
+          onChange={(e) => handleSearchChange(e.target.value)}
+        />
       </div>
 
       {/* Table */}
       <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-        <div className="overflow-x-auto">
+        <div className={`overflow-x-auto ${isFiltering ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/40">
@@ -190,21 +112,28 @@ export function LeadsPage() {
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Fecha
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Estado
-                </th>
                 <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Acciones
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y">
-              {paginated.map((lead) => (
-                <LeadRow key={lead.id} lead={lead} />
-              ))}
-              {paginated.length === 0 && (
+              {isLoading &&
+                Array.from({ length: 5 }).map((_, i) => <LeadRowSkeleton key={i} />)}
+
+              {!isLoading &&
+                leads.map((lead) => (
+                  <LeadRow
+                    key={lead.id}
+                    lead={lead}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                ))}
+
+              {!isLoading && leads.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                     No se encontraron leads.
                   </td>
                 </tr>
@@ -214,41 +143,68 @@ export function LeadsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between border-t px-4 py-3">
-          <p className="text-sm text-muted-foreground">
-            Mostrando {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
-            {Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} de {filtered.length} leads
-          </p>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="icon-xs"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-            >
-              <ChevronLeft className="size-4" />
-            </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+        {totalPages > 0 && (
+          <div className="flex items-center justify-between border-t px-4 py-3">
+            <p className="text-sm text-muted-foreground">
+              Mostrando {currentPage * LEADS_PAGE_SIZE + 1}-
+              {Math.min((currentPage + 1) * LEADS_PAGE_SIZE, total)} de {total} leads
+            </p>
+            <div className="flex items-center gap-1">
               <Button
-                key={page}
-                variant={page === currentPage ? 'default' : 'ghost'}
+                variant="outline"
                 size="icon-xs"
-                onClick={() => setCurrentPage(page)}
+                disabled={currentPage === 0}
+                onClick={() => setCurrentPage((p) => p - 1)}
               >
-                {page}
+                <ChevronLeft className="size-4" />
               </Button>
-            ))}
-            <Button
-              variant="outline"
-              size="icon-xs"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-            >
-              <ChevronRight className="size-4" />
-            </Button>
+              {Array.from({ length: totalPages }, (_, i) => i).map((page) => (
+                <Button
+                  key={page}
+                  variant={page === currentPage ? 'default' : 'ghost'}
+                  size="icon-xs"
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page + 1}
+                </Button>
+              ))}
+              <Button
+                variant="outline"
+                size="icon-xs"
+                disabled={currentPage === totalPages - 1}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
+  );
+}
+
+function LeadRowSkeleton() {
+  return (
+    <tr>
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-3">
+          <Skeleton className="size-9 rounded-full" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+      </td>
+      <td className="px-4 py-3">
+        <Skeleton className="h-4 w-40" />
+      </td>
+      <td className="px-4 py-3">
+        <Skeleton className="h-5 w-28 rounded-full" />
+      </td>
+      <td className="px-4 py-3">
+        <Skeleton className="h-4 w-24" />
+      </td>
+      <td className="px-4 py-3 text-right">
+        <Skeleton className="ml-auto size-6 rounded" />
+      </td>
+    </tr>
   );
 }

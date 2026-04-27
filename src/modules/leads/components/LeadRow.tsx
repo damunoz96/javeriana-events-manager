@@ -1,49 +1,75 @@
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '#/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '#/components/ui/dropdown-menu';
 
-type LeadStatus = 'nuevo' | 'contactado' | 'inscrito' | 'rechazado';
-
-export interface Lead {
-  id: string;
-  nombre: string;
-  email: string;
-  interesAcademico: string;
-  fecha: string;
-  estado: LeadStatus;
+interface LeadRowProps {
+  lead: {
+    id: string;
+    name: string;
+    last_name: string;
+    email: string;
+    created_at: string;
+    programs: { title: string } | null;
+  };
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export function LeadRow({ lead }: { lead: Lead }) {
-  const status = statusConfig[lead.estado];
+export function LeadRow({ lead, onEdit, onDelete }: LeadRowProps) {
+  const fullName = `${lead.name} ${lead.last_name}`;
+  const date = new Date(lead.created_at).toLocaleDateString('es-CO', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 
   return (
     <tr className="transition-colors hover:bg-muted/30">
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-            {getInitials(lead.nombre)}
+            {getInitials(fullName)}
           </div>
-          <span className="font-medium">{lead.nombre}</span>
+          <span className="font-medium">{fullName}</span>
         </div>
       </td>
       <td className="px-4 py-3 text-muted-foreground">{lead.email}</td>
       <td className="px-4 py-3">
-        <span className="inline-flex rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs font-medium">
-          {lead.interesAcademico}
-        </span>
+        {lead.programs ? (
+          <span className="inline-flex rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs font-medium">
+            {lead.programs.title}
+          </span>
+        ) : (
+          <span className="text-xs text-muted-foreground">-</span>
+        )}
       </td>
-      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{lead.fecha}</td>
-      <td className="px-4 py-3">
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${status.className}`}
-        >
-          <span className="size-1.5 rounded-full bg-current" />
-          {status.label}
-        </span>
-      </td>
+      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{date}</td>
       <td className="px-4 py-3 text-right">
-        <Button variant="ghost" size="icon-xs">
-          <MoreVertical className="size-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon-xs">
+              <MoreVertical className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onEdit(lead.id)}>
+              <Pencil className="size-4" />
+              Editar
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={() => onDelete(lead.id)}
+            >
+              <Trash2 className="size-4" />
+              Eliminar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </td>
     </tr>
   );
@@ -57,10 +83,3 @@ function getInitials(name: string) {
     .toUpperCase()
     .slice(0, 2);
 }
-
-const statusConfig: Record<LeadStatus, { label: string; className: string }> = {
-  nuevo: { label: 'Nuevo', className: 'text-blue-600 bg-blue-50' },
-  contactado: { label: 'Contactado', className: 'text-amber-600 bg-amber-50' },
-  inscrito: { label: 'Inscrito', className: 'text-emerald-600 bg-emerald-50' },
-  rechazado: { label: 'Rechazado', className: 'text-red-600 bg-red-50' },
-};
