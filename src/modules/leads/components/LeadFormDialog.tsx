@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Leads } from '../services/leads';
+import { useAppForm } from '#/hooks/form';
 import { allProgramsQueryOptions } from '#/modules/events/query-options/events-options';
 import { QueryKeys } from '#/constants/query-keys';
 import { Button } from '#/components/ui/button';
@@ -12,22 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '#/components/ui/dialog';
-import { Input } from '#/components/ui/input';
-import { Label } from '#/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '#/components/ui/select';
-
-interface LeadFormData {
-  name: string;
-  last_name: string;
-  email: string;
-  program_id: string;
-}
 
 interface LeadFormDialogProps {
   open: boolean;
@@ -52,39 +37,19 @@ export function LeadFormDialog({
   const isEditing = !!leadId;
   const queryClient = useQueryClient();
 
-  const [form, setForm] = useState<LeadFormData>({
-    name: '',
-    last_name: '',
-    email: '',
-    program_id: '',
-  });
-
   const { data: programs = [] } = useQuery({
     ...allProgramsQueryOptions,
     enabled: open,
   });
 
-  useEffect(() => {
-    if (!open) return;
-
-    if (defaultValues) {
-      setForm(defaultValues);
-    } else {
-      setForm({
-        name: '',
-        last_name: '',
-        email: '',
-        program_id: defaultProgramId ?? '',
-      });
-    }
-  }, [open, defaultValues, defaultProgramId]);
+  const programOptions = programs.map((p) => ({ value: p.id, label: p.title }));
 
   const mutation = useMutation({
-    mutationFn: async (data: LeadFormData) => {
-      if (isEditing) {
-        return Leads.update(leadId, data);
-      }
-      return Leads.create(data);
+    mutationFn: async (data: { name: string; last_name: string; email: string; program_id: string }) => {
+      return Leads.upsert({
+        ...(leadId ? { id: leadId } : {}),
+        ...data,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QueryKeys.LEADS] });
@@ -93,12 +58,32 @@ export function LeadFormDialog({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    mutation.mutate(form);
-  };
+  const form = useAppForm({
+    defaultValues: {
+      name: '',
+      last_name: '',
+      email: '',
+      program_id: defaultProgramId ?? '',
+    },
+    onSubmit: async ({ value }) => {
+      await mutation.mutateAsync(value);
+    },
+  });
 
-  const isValid = form.name && form.last_name && form.email && form.program_id;
+  useEffect(() => {
+    if (!open) return;
+
+    if (defaultValues) {
+      form.reset(defaultValues);
+    } else {
+      form.reset({
+        name: '',
+        last_name: '',
+        email: '',
+        program_id: defaultProgramId ?? '',
+      });
+    }
+  }, [open, defaultValues, defaultProgramId]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -111,77 +96,89 @@ export function LeadFormDialog({
               : 'Completa los datos para registrar un nuevo lead.'}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="space-y-4"
+        >
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nombre</Label>
-              <Input
-                id="name"
-                placeholder="Nombre"
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="last_name">Apellido</Label>
-              <Input
-                id="last_name"
-                placeholder="Apellido"
-                value={form.last_name}
-                onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Correo electronico</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="correo@ejemplo.com"
-              value={form.email}
-              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="program">Programa de interes</Label>
-            <Select
-              value={form.program_id}
-              onValueChange={(value) => setForm((f) => ({ ...f, program_id: value }))}
-              disabled={!!defaultProgramId}
+            <form.AppField
+              name="name"
+              validators={{
+                onBlur: ({ value }) => (!value ? 'El nombre es requerido' : undefined),
+                onSubmit: ({ value }) => (!value ? 'El nombre es requerido' : undefined),
+              }}
             >
-              <SelectTrigger id="program" className="w-full">
-                <SelectValue placeholder="Selecciona un programa" />
-              </SelectTrigger>
-              <SelectContent>
-                {programs.map((program) => (
-                  <SelectItem key={program.id} value={program.id}>
-                    {program.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {(field) => <field.TextField label="Nombre" placeholder="Nombre" />}
+            </form.AppField>
+
+            <form.AppField
+              name="last_name"
+              validators={{
+                onBlur: ({ value }) => (!value ? 'El apellido es requerido' : undefined),
+                onSubmit: ({ value }) => (!value ? 'El apellido es requerido' : undefined),
+              }}
+            >
+              {(field) => <field.TextField label="Apellido" placeholder="Apellido" />}
+            </form.AppField>
           </div>
+
+          <form.AppField
+            name="email"
+            validators={{
+              onBlur: ({ value }) => {
+                if (!value) return 'El correo es requerido';
+                if (!/^[^\s@]+@javeriana\.edu\.co$/i.test(value))
+                  return 'Solo se permiten correos @javeriana.edu.co';
+                return undefined;
+              },
+              onSubmit: ({ value }) => {
+                if (!value) return 'El correo es requerido';
+                if (!/^[^\s@]+@javeriana\.edu\.co$/i.test(value))
+                  return 'Solo se permiten correos @javeriana.edu.co';
+                return undefined;
+              },
+            }}
+          >
+            {(field) => (
+              <field.TextField
+                label="Correo electronico"
+                placeholder="correo@javeriana.edu.co"
+                type="email"
+              />
+            )}
+          </form.AppField>
+
+          <form.AppField
+            name="program_id"
+            validators={{
+              onBlur: ({ value }) => (!value ? 'Selecciona un programa' : undefined),
+              onSubmit: ({ value }) => (!value ? 'Selecciona un programa' : undefined),
+            }}
+          >
+            {(field) => (
+              <field.SelectField
+                label="Programa de interes"
+                placeholder="Selecciona un programa"
+                options={programOptions}
+                disabled={!!defaultProgramId}
+              />
+            )}
+          </form.AppField>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={!isValid || mutation.isPending}>
-              {mutation.isPending
-                ? 'Guardando...'
-                : isEditing
-                  ? 'Guardar cambios'
-                  : 'Crear Lead'}
-            </Button>
+            <form.AppForm>
+              <form.SubmitButton
+                label={isEditing ? 'Guardar cambios' : 'Crear Lead'}
+                pendingLabel="Guardando..."
+              />
+            </form.AppForm>
           </DialogFooter>
         </form>
       </DialogContent>

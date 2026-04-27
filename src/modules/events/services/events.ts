@@ -42,12 +42,7 @@ export class Events {
   }
 
   static async getById(id: string) {
-    const { data } = await supabase
-      .from('programs')
-      .select()
-      .eq('id', id)
-      .single()
-      .throwOnError();
+    const { data } = await supabase.from('programs').select().eq('id', id).single().throwOnError();
 
     return data;
   }
@@ -56,13 +51,12 @@ export class Events {
     const from = page * 10;
     const to = from + 9;
 
-    let query = supabase
-      .from('leads')
-      .select('*', { count: 'exact' })
-      .eq('program_id', programId);
+    let query = supabase.from('leads').select('*', { count: 'exact' }).eq('program_id', programId);
 
     if (search) {
-      query = query.or(`name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`);
+      query = query.or(
+        `name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`
+      );
     }
 
     const { data: leads, count } = await query
