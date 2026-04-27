@@ -12,6 +12,12 @@ export const eventsQueryOptions = (level: LevelFilter = null, search: string = '
     staleTime: Infinity,
   });
 
+export const allProgramsQueryOptions = queryOptions({
+  queryKey: [QueryKeys.EVENTS, 'all'],
+  queryFn: () => Events.getAll(),
+  staleTime: Infinity,
+});
+
 export const eventDetailQueryOptions = (id: string) =>
   queryOptions({
     queryKey: [QueryKeys.EVENTS, 'detail', id],

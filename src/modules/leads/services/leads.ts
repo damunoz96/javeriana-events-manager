@@ -1,3 +1,4 @@
+import type { LeadInsert } from '../models/leads.models';
 import { supabase } from '#/integrations/supabase/client';
 
 export const LEADS_PAGE_SIZE = 10;
@@ -24,5 +25,43 @@ export class Leads {
       data: leads ?? [],
       total: count ?? 0,
     };
+  }
+
+  static async getById(id: string) {
+    const { data } = await supabase
+      .from('leads')
+      .select('*, programs(title)')
+      .eq('id', id)
+      .single()
+      .throwOnError();
+
+    return data;
+  }
+
+  static async create(lead: LeadInsert) {
+    const { data } = await supabase
+      .from('leads')
+      .insert(lead)
+      .select()
+      .single()
+      .throwOnError();
+
+    return data;
+  }
+
+  static async update(id: string, lead: Partial<LeadInsert>) {
+    const { data } = await supabase
+      .from('leads')
+      .update(lead)
+      .eq('id', id)
+      .select()
+      .single()
+      .throwOnError();
+
+    return data;
+  }
+
+  static async delete(id: string) {
+    await supabase.from('leads').delete().eq('id', id).throwOnError();
   }
 }

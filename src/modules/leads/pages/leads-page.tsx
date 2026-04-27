@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Download, Plus, Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { LeadRow } from '../components/LeadRow';
+import { LeadFormDialog } from '../components/LeadFormDialog';
+import { LeadDeleteDialog } from '../components/LeadDeleteDialog';
 import { leadsQueryOptions } from '../query-options/leads-options';
-import { LEADS_PAGE_SIZE } from '../services/leads';
+import { Leads, LEADS_PAGE_SIZE } from '../services/leads';
 import { useDebounce } from '#/hooks/use-debounce';
 import { Button } from '#/components/ui/button';
 import { Input } from '#/components/ui/input';
@@ -21,17 +23,45 @@ export function LeadsPage() {
   const totalPages = Math.ceil(total / LEADS_PAGE_SIZE);
   const isFiltering = isFetching && !isLoading;
 
+  // Form dialog state
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingLead, setEditingLead] = useState<{
+    id: string;
+    values: { name: string; last_name: string; email: string; program_id: string };
+  } | null>(null);
+
+  // Delete dialog state
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null);
+
   const handleSearchChange = (value: string) => {
     setSearch(value);
     setCurrentPage(0);
   };
 
-  const handleEdit = (id: string) => {
-    console.log('Edit lead:', id);
+  const handleCreate = () => {
+    setEditingLead(null);
+    setFormOpen(true);
+  };
+
+  const handleEdit = async (id: string) => {
+    const lead = await Leads.getById(id);
+    if (!lead) return;
+    setEditingLead({
+      id,
+      values: {
+        name: lead.name,
+        last_name: lead.last_name,
+        email: lead.email,
+        program_id: lead.program_id,
+      },
+    });
+    setFormOpen(true);
   };
 
   const handleDelete = (id: string) => {
-    console.log('Delete lead:', id);
+    setDeletingLeadId(id);
+    setDeleteOpen(true);
   };
 
   return (
@@ -49,7 +79,7 @@ export function LeadsPage() {
             <Download className="size-4" />
             Exportar CSV
           </Button>
-          <Button variant="gold" size="sm">
+          <Button variant="gold" size="sm" onClick={handleCreate}>
             <Plus className="size-4" />
             Nuevo Lead
           </Button>
@@ -174,6 +204,20 @@ export function LeadsPage() {
           </div>
         )}
       </div>
+
+      {/* Dialogs */}
+      <LeadFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        leadId={editingLead?.id}
+        defaultValues={editingLead?.values}
+      />
+
+      <LeadDeleteDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        leadId={deletingLeadId}
+      />
     </div>
   );
 }

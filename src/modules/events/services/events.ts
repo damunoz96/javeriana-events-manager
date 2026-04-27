@@ -31,6 +31,16 @@ export class Events {
     };
   }
 
+  static async getAll() {
+    const { data } = await supabase
+      .from('programs')
+      .select('id, title')
+      .order('title')
+      .throwOnError();
+
+    return data ?? [];
+  }
+
   static async getById(id: string) {
     const { data } = await supabase
       .from('programs')
