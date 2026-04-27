@@ -14,13 +14,14 @@ interface LeadRowProps {
     last_name: string;
     email: string;
     created_at: string;
-    programs: { title: string } | null;
+    programs?: { title: string } | null;
   };
+  showProgram?: boolean;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-export function LeadRow({ lead, onEdit, onDelete }: LeadRowProps) {
+export function LeadRow({ lead, showProgram = true, onEdit, onDelete }: LeadRowProps) {
   const fullName = `${lead.name} ${lead.last_name}`;
   const date = new Date(lead.created_at).toLocaleDateString('es-CO', {
     day: 'numeric',
@@ -39,15 +40,17 @@ export function LeadRow({ lead, onEdit, onDelete }: LeadRowProps) {
         </div>
       </td>
       <td className="px-4 py-3 text-muted-foreground">{lead.email}</td>
-      <td className="px-4 py-3">
-        {lead.programs ? (
-          <span className="inline-flex rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs font-medium">
-            {lead.programs.title}
-          </span>
-        ) : (
-          <span className="text-xs text-muted-foreground">-</span>
-        )}
-      </td>
+      {showProgram && (
+        <td className="px-4 py-3">
+          {lead.programs ? (
+            <span className="inline-flex rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs font-medium">
+              {lead.programs.title}
+            </span>
+          ) : (
+            <span className="text-xs text-muted-foreground">-</span>
+          )}
+        </td>
+      )}
       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{date}</td>
       <td className="px-4 py-3 text-right">
         <DropdownMenu>

@@ -13,7 +13,8 @@ import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardLeadsRouteImport } from './routes/dashboard/leads'
-import { Route as DashboardEventsRouteImport } from './routes/dashboard/events'
+import { Route as DashboardEventsIndexRouteImport } from './routes/dashboard/events/index'
+import { Route as DashboardEventsEventIdRouteImport } from './routes/dashboard/events/$eventId'
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/dashboard',
@@ -35,50 +36,65 @@ const DashboardLeadsRoute = DashboardLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardEventsRoute = DashboardEventsRouteImport.update({
-  id: '/events',
-  path: '/events',
+const DashboardEventsIndexRoute = DashboardEventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardEventsEventIdRoute = DashboardEventsEventIdRouteImport.update({
+  id: '/events/$eventId',
+  path: '/events/$eventId',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
-  '/dashboard/events': typeof DashboardEventsRoute
   '/dashboard/leads': typeof DashboardLeadsRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
+  '/dashboard/events/': typeof DashboardEventsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard/events': typeof DashboardEventsRoute
   '/dashboard/leads': typeof DashboardLeadsRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
+  '/dashboard/events': typeof DashboardEventsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
-  '/dashboard/events': typeof DashboardEventsRoute
   '/dashboard/leads': typeof DashboardLeadsRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
+  '/dashboard/events/': typeof DashboardEventsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/dashboard'
-    | '/dashboard/events'
     | '/dashboard/leads'
     | '/dashboard/'
+    | '/dashboard/events/$eventId'
+    | '/dashboard/events/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard/events' | '/dashboard/leads' | '/dashboard'
+  to:
+    | '/'
+    | '/dashboard/leads'
+    | '/dashboard'
+    | '/dashboard/events/$eventId'
+    | '/dashboard/events'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
-    | '/dashboard/events'
     | '/dashboard/leads'
     | '/dashboard/'
+    | '/dashboard/events/$eventId'
+    | '/dashboard/events/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -116,26 +132,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLeadsRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/events': {
-      id: '/dashboard/events'
+    '/dashboard/events/': {
+      id: '/dashboard/events/'
       path: '/events'
-      fullPath: '/dashboard/events'
-      preLoaderRoute: typeof DashboardEventsRouteImport
+      fullPath: '/dashboard/events/'
+      preLoaderRoute: typeof DashboardEventsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/events/$eventId': {
+      id: '/dashboard/events/$eventId'
+      path: '/events/$eventId'
+      fullPath: '/dashboard/events/$eventId'
+      preLoaderRoute: typeof DashboardEventsEventIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
   }
 }
 
 interface DashboardRouteRouteChildren {
-  DashboardEventsRoute: typeof DashboardEventsRoute
   DashboardLeadsRoute: typeof DashboardLeadsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardEventsEventIdRoute: typeof DashboardEventsEventIdRoute
+  DashboardEventsIndexRoute: typeof DashboardEventsIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
-  DashboardEventsRoute: DashboardEventsRoute,
   DashboardLeadsRoute: DashboardLeadsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardEventsEventIdRoute: DashboardEventsEventIdRoute,
+  DashboardEventsIndexRoute: DashboardEventsIndexRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

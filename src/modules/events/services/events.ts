@@ -26,8 +26,43 @@ export class Events {
       .throwOnError();
 
     return {
-      data: events ?? [],
+      data: events,
       nextPage: count !== null && to < count - 1 ? page + 1 : undefined,
+    };
+  }
+
+  static async getById(id: string) {
+    const { data } = await supabase
+      .from('programs')
+      .select()
+      .eq('id', id)
+      .single()
+      .throwOnError();
+
+    return data;
+  }
+
+  static async getLeadsByProgramId(programId: string, search: string = '', page: number = 0) {
+    const from = page * 10;
+    const to = from + 9;
+
+    let query = supabase
+      .from('leads')
+      .select('*', { count: 'exact' })
+      .eq('program_id', programId);
+
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`);
+    }
+
+    const { data: leads, count } = await query
+      .order('created_at', { ascending: false })
+      .range(from, to)
+      .throwOnError();
+
+    return {
+      data: leads ?? [],
+      total: count ?? 0,
     };
   }
 }

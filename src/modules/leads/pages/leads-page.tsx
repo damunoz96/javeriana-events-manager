@@ -14,9 +14,7 @@ export function LeadsPage() {
   const debouncedSearch = useDebounce(search);
   const [currentPage, setCurrentPage] = useState(0);
 
-  const { data, isLoading, isFetching } = useQuery(
-    leadsQueryOptions(debouncedSearch, currentPage),
-  );
+  const { data, isLoading, isFetching } = useQuery(leadsQueryOptions(debouncedSearch, currentPage));
 
   const leads = data?.data ?? [];
   const total = data?.total ?? 0;
@@ -96,7 +94,9 @@ export function LeadsPage() {
 
       {/* Table */}
       <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-        <div className={`overflow-x-auto ${isFiltering ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}>
+        <div
+          className={`overflow-x-auto ${isFiltering ? 'opacity-50 transition-opacity' : 'transition-opacity'}`}
+        >
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/40">
@@ -118,17 +118,11 @@ export function LeadsPage() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {isLoading &&
-                Array.from({ length: 5 }).map((_, i) => <LeadRowSkeleton key={i} />)}
+              {isLoading && Array.from({ length: 5 }).map((_, i) => <LeadRowSkeleton key={i} />)}
 
               {!isLoading &&
                 leads.map((lead) => (
-                  <LeadRow
-                    key={lead.id}
-                    lead={lead}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
+                  <LeadRow key={lead.id} lead={lead} onEdit={handleEdit} onDelete={handleDelete} />
                 ))}
 
               {!isLoading && leads.length === 0 && (
