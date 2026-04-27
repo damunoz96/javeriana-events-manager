@@ -1,5 +1,5 @@
 import { Link, Outlet } from '@tanstack/react-router';
-import { AppSidebar } from '../app/app-sidebar';
+import { AppSidebar } from '../app/AppSidebar';
 
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '#/components/ui/sidebar';
 import { TooltipProvider } from '#/components/ui/tooltip';
