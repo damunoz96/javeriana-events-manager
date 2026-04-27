@@ -8,7 +8,7 @@ function Home() {
       <p className="mt-4 text-lg">
         Oferta de programas, para ir al dashboard:
         <Link to="/dashboard" className="ml-4 text-blue-500 hover:underline">
-          Click aquí
+          Click aquí!!
         </Link>
       </p>
     </div>
