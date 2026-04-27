@@ -1,4 +1,4 @@
-import { Outlet } from '@tanstack/react-router';
+import { Link, Outlet } from '@tanstack/react-router';
 import { AppSidebar } from '../app/app-sidebar';
 
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '#/components/ui/sidebar';
@@ -12,9 +12,12 @@ export function AdminLayout() {
         <SidebarInset>
           <header className="flex h-14 items-center gap-2 border-b px-4">
             <SidebarTrigger />
-            <h1 className="font-heading text-lg font-semibold text-primary">
+            <Link
+              to="/dashboard"
+              className="font-heading text-lg font-semibold text-primary hover:opacity-80 transition-opacity"
+            >
               Javeriana Lead & Events Manager
-            </h1>
+            </Link>
           </header>
           <main className="flex-1 p-6">
             <Outlet />

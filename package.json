@@ -17,6 +17,7 @@
   "dependencies": {
     "@fontsource-variable/raleway": "^5.2.8",
     "@fontsource-variable/roboto": "^5.2.10",
+    "@supabase/supabase-js": "^2.104.1",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-form": "^1.29.1",

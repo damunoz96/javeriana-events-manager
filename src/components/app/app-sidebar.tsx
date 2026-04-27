@@ -36,14 +36,16 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" tooltip="Pontificia Universidad Javeriana">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <span className="font-heading text-xs font-bold">PUJ</span>
-              </div>
-              <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-heading text-sm font-semibold">Pontificia Universidad</span>
-                <span className="font-heading text-xs text-muted-foreground">Javeriana</span>
-              </div>
+            <SidebarMenuButton size="lg" tooltip="Pontificia Universidad Javeriana" asChild>
+              <Link to="/dashboard">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                  <span className="font-heading text-xs font-bold">PUJ</span>
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-heading text-sm font-semibold">Pontificia Universidad</span>
+                  <span className="font-heading text-xs text-muted-foreground">Javeriana</span>
+                </div>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
