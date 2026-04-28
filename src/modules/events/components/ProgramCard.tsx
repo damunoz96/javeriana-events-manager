@@ -17,6 +17,10 @@ export function ProgramCard({ program }: { program: Event }) {
           <img
             src={program.cover_image_url}
             alt={program.title}
+            loading="lazy"
+            decoding="async"
+            width={400}
+            height={300}
             className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -69,6 +73,11 @@ export function FeaturedProgramCard({ program }: { program: Event }) {
           <img
             src={program.cover_image_url}
             alt={program.title}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            width={640}
+            height={320}
             className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />

@@ -100,6 +100,7 @@ export function LeadFormDialog({
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            e.stopPropagation();
             form.handleSubmit();
           }}
           className="space-y-4"
