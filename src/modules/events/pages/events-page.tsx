@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { FeaturedProgramCard, ProgramCard } from '../components/ProgramCard';
 import { eventsQueryOptions } from '../query-options/events-options';
 import type { LevelFilter } from '../services/events';
@@ -29,25 +30,6 @@ export function EventsPage() {
   const rest = programs.slice(1);
   const isInitialLoading = isLoading;
   const isFiltering = isFetching && !isFetchingNextPage && !isLoading;
-
-  const loaderRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = loaderRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0, rootMargin: '200px' }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className="space-y-6">
@@ -103,11 +85,26 @@ export function EventsPage() {
           {featured && <FeaturedProgramCard program={featured} />}
 
           {rest.length > 0 ? (
-            <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {rest.map((program) => (
-                <ProgramCard key={program.id} program={program} />
-              ))}
-            </div>
+            <InfiniteScroll
+              dataLength={rest.length}
+              next={fetchNextPage}
+              hasMore={!!hasNextPage}
+              loader={
+                <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <ProgramCardSkeleton key={i} />
+                  ))}
+                </div>
+              }
+              scrollThreshold={0.8}
+              style={{ overflow: 'visible' }}
+            >
+              <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {rest.map((program) => (
+                  <ProgramCard key={program.id} program={program} />
+                ))}
+              </div>
+            </InfiniteScroll>
           ) : (
             !featured && (
               <div className="py-12 text-center text-muted-foreground">
@@ -117,17 +114,6 @@ export function EventsPage() {
           )}
         </div>
       )}
-
-      {/* Infinite scroll trigger */}
-      <div ref={loaderRef}>
-        {isFetchingNextPage && (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <ProgramCardSkeleton key={i} />
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }

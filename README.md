@@ -2,6 +2,8 @@
 
 Dashboard administrativo para la gestión de programas académicos y leads (aspirantes interesados) de la Pontificia Universidad Javeriana.
 
+**Demo en vivo:** [javeriana.damunoz.online](http://javeriana.damunoz.online/)
+
 ## Requisitos previos
 
 - [Node.js](https://nodejs.org/) v18 o superior
@@ -89,6 +91,7 @@ src/
 ### Data fetching y estado del servidor
 
 - **TanStack Query** para todo el manejo de datos del servidor. Se aprovechan features como `keepPreviousData` para transiciones suaves entre filtros, `infiniteQueryOptions` para el infinite scroll del catálogo, y query keys que incluyen los filtros para mantener cache granular.
+- **react-infinite-scroll-component** para el scroll infinito del catálogo, integrado con `useInfiniteQuery` de TanStack Query para cargar páginas automáticamente al llegar al final de la lista.
 - Los servicios (`Events`, `Leads`) encapsulan las llamadas a Supabase y se consumen desde los query options, separando la lógica de fetching de los componentes.
 
 ### Formularios
@@ -108,6 +111,13 @@ src/
 ### Notificaciones
 
 - **Sonner** para toasts de feedback en operaciones CRUD (crear, editar, eliminar leads). Se integra con el theme context para respetar el modo claro/oscuro.
+
+### Optimizaciones de rendimiento
+
+- **Composición GPU en imágenes:** Se usa `will-change: transform` en las imágenes del catálogo para que el navegador las promueva a capas independientes, evitando repaint al hacer scroll.
+- **Transiciones específicas:** Se reemplazó `transition-all` por `transition-shadow` en las cards para que el navegador solo recalcule la propiedad que realmente se anima en hover, reduciendo el trabajo de layout durante el scroll.
+- **Debounce en búsqueda:** El input de búsqueda usa un hook `useDebounce` para evitar disparar queries en cada keystroke.
+- **Cache granular:** Las query keys incluyen los filtros activos (nivel, búsqueda), lo que permite a TanStack Query cachear resultados por combinación de filtros y evitar re-fetches innecesarios (`staleTime: Infinity`).
 
 ### Arquitectura modular
 

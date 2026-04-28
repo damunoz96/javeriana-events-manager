@@ -12,16 +12,15 @@ const modalityLabels: Record<Event['modality'], string> = {
 export function ProgramCard({ program }: { program: Event }) {
   return (
     <Link to="/dashboard/events/$eventId" params={{ eventId: program.id }} className="block">
-      <Card className="group cursor-pointer pt-0 transition-all hover:shadow-md">
+      <Card className="group cursor-pointer pt-0 transition-shadow hover:shadow-md">
         <div className="relative aspect-4/3 overflow-hidden rounded-t-xl">
           <img
             src={program.cover_image_url}
             alt={program.title}
-            loading="lazy"
             decoding="async"
             width={400}
             height={300}
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="size-full object-cover will-change-transform transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
           <span className="absolute left-3 top-3 rounded-full bg-primary/90 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-primary-foreground">
@@ -68,7 +67,7 @@ export function ProgramCard({ program }: { program: Event }) {
 export function FeaturedProgramCard({ program }: { program: Event }) {
   return (
     <Link to="/dashboard/events/$eventId" params={{ eventId: program.id }} className="block">
-      <Card className="group cursor-pointer pt-0 transition-all hover:shadow-md sm:flex-row sm:overflow-hidden sm:py-0">
+      <Card className="group cursor-pointer pt-0 transition-shadow hover:shadow-md sm:flex-row sm:overflow-hidden sm:py-0">
         <div className="relative aspect-4/3 overflow-hidden rounded-t-xl sm:aspect-auto sm:h-80 sm:w-1/2 sm:shrink-0 sm:rounded-l-xl sm:rounded-tr-none">
           <img
             src={program.cover_image_url}
