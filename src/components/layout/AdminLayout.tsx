@@ -1,10 +1,15 @@
+import { Moon, Sun } from 'lucide-react';
 import { Link, Outlet } from '@tanstack/react-router';
 import { AppSidebar } from '../app/AppSidebar';
 
+import { Button } from '#/components/ui/button';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '#/components/ui/sidebar';
 import { TooltipProvider } from '#/components/ui/tooltip';
+import { useTheme } from '#/hooks/use-theme';
 
 export function AdminLayout() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <TooltipProvider>
       <SidebarProvider>
@@ -18,6 +23,11 @@ export function AdminLayout() {
             >
               Javeriana Lead & Events Manager
             </Link>
+            <div className="ml-auto">
+              <Button variant="ghost" size="icon" onClick={toggleTheme}>
+                {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              </Button>
+            </div>
           </header>
           <main className="flex-1 p-6">
             <Outlet />

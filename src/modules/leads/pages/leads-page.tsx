@@ -113,8 +113,7 @@ export function LeadsPage() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {isLoading &&
-                Array.from({ length: 5 }).map((_, i) => <LeadRowSkeleton key={i} />)}
+              {isLoading && Array.from({ length: 5 }).map((_, i) => <LeadRowSkeleton key={i} />)}
 
               {!isLoading &&
                 leads.map((lead) => (
