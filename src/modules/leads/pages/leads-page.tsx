@@ -1,15 +1,18 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Download, Plus, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { LeadRow } from '../components/LeadRow';
+import { LeadRowSkeleton } from '../components/LeadRowSkeleton';
 import { LeadFormDialog } from '../components/LeadFormDialog';
 import { LeadDeleteDialog } from '../components/LeadDeleteDialog';
+import { useLeadCrud } from '../hooks/use-lead-crud';
 import { leadsQueryOptions } from '../query-options/leads-options';
-import { Leads, LEADS_PAGE_SIZE } from '../services/leads';
+import { LEADS_PAGE_SIZE } from '../services/leads';
 import { useDebounce } from '#/hooks/use-debounce';
 import { Button } from '#/components/ui/button';
 import { Input } from '#/components/ui/input';
 import { Skeleton } from '#/components/ui/skeleton';
+import { PaginationControls } from '#/components/ui/pagination-controls';
 
 export function LeadsPage() {
   const [search, setSearch] = useState('');
@@ -23,45 +26,11 @@ export function LeadsPage() {
   const totalPages = Math.ceil(total / LEADS_PAGE_SIZE);
   const isFiltering = isFetching && !isLoading;
 
-  // Form dialog state
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingLead, setEditingLead] = useState<{
-    id: string;
-    values: { name: string; last_name: string; email: string; program_id: string };
-  } | null>(null);
-
-  // Delete dialog state
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null);
+  const crud = useLeadCrud();
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
     setCurrentPage(0);
-  };
-
-  const handleCreate = () => {
-    setEditingLead(null);
-    setFormOpen(true);
-  };
-
-  const handleEdit = async (id: string) => {
-    const lead = await Leads.getById(id);
-    if (!lead) return;
-    setEditingLead({
-      id,
-      values: {
-        name: lead.name,
-        last_name: lead.last_name,
-        email: lead.email,
-        program_id: lead.program_id,
-      },
-    });
-    setFormOpen(true);
-  };
-
-  const handleDelete = (id: string) => {
-    setDeletingLeadId(id);
-    setDeleteOpen(true);
   };
 
   return (
@@ -75,11 +44,7 @@ export function LeadsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="size-4" />
-            Exportar CSV
-          </Button>
-          <Button variant="gold" size="sm" onClick={handleCreate}>
+          <Button variant="gold" size="sm" onClick={crud.handleCreate}>
             <Plus className="size-4" />
             Nuevo Lead
           </Button>
@@ -148,11 +113,17 @@ export function LeadsPage() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {isLoading && Array.from({ length: 5 }).map((_, i) => <LeadRowSkeleton key={i} />)}
+              {isLoading &&
+                Array.from({ length: 5 }).map((_, i) => <LeadRowSkeleton key={i} />)}
 
               {!isLoading &&
                 leads.map((lead) => (
-                  <LeadRow key={lead.id} lead={lead} onEdit={handleEdit} onDelete={handleDelete} />
+                  <LeadRow
+                    key={lead.id}
+                    lead={lead}
+                    onEdit={crud.handleEdit}
+                    onDelete={crud.handleDelete}
+                  />
                 ))}
 
               {!isLoading && leads.length === 0 && (
@@ -166,83 +137,29 @@ export function LeadsPage() {
           </table>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 0 && (
-          <div className="flex items-center justify-between border-t px-4 py-3">
-            <p className="text-sm text-muted-foreground">
-              Mostrando {currentPage * LEADS_PAGE_SIZE + 1}-
-              {Math.min((currentPage + 1) * LEADS_PAGE_SIZE, total)} de {total} leads
-            </p>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="icon-xs"
-                disabled={currentPage === 0}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                <ChevronLeft className="size-4" />
-              </Button>
-              {Array.from({ length: totalPages }, (_, i) => i).map((page) => (
-                <Button
-                  key={page}
-                  variant={page === currentPage ? 'default' : 'ghost'}
-                  size="icon-xs"
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page + 1}
-                </Button>
-              ))}
-              <Button
-                variant="outline"
-                size="icon-xs"
-                disabled={currentPage === totalPages - 1}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                <ChevronRight className="size-4" />
-              </Button>
-            </div>
-          </div>
-        )}
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={total}
+          pageSize={LEADS_PAGE_SIZE}
+          onPageChange={setCurrentPage}
+          label="leads"
+        />
       </div>
 
       {/* Dialogs */}
       <LeadFormDialog
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        leadId={editingLead?.id}
-        defaultValues={editingLead?.values}
+        open={crud.formOpen}
+        onOpenChange={crud.setFormOpen}
+        leadId={crud.editingLead?.id}
+        defaultValues={crud.editingLead?.values}
       />
 
       <LeadDeleteDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        leadId={deletingLeadId}
+        open={crud.deleteOpen}
+        onOpenChange={crud.setDeleteOpen}
+        leadId={crud.deletingLeadId}
       />
     </div>
-  );
-}
-
-function LeadRowSkeleton() {
-  return (
-    <tr>
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-3">
-          <Skeleton className="size-9 rounded-full" />
-          <Skeleton className="h-4 w-32" />
-        </div>
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-4 w-40" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-5 w-28 rounded-full" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-4 w-24" />
-      </td>
-      <td className="px-4 py-3 text-right">
-        <Skeleton className="ml-auto size-6 rounded" />
-      </td>
-    </tr>
   );
 }

@@ -2,8 +2,6 @@ import { useState } from 'react';
 import {
   ArrowLeft,
   Calendar,
-  ChevronLeft,
-  ChevronRight,
   Clock,
   GraduationCap,
   MapPin,
@@ -15,16 +13,17 @@ import { Link } from '@tanstack/react-router';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { eventDetailQueryOptions, eventLeadsQueryOptions } from '../query-options/events-options';
 import { LeadRow } from '#/modules/leads/components/LeadRow';
+import { LeadRowSkeleton } from '#/modules/leads/components/LeadRowSkeleton';
 import { LeadFormDialog } from '#/modules/leads/components/LeadFormDialog';
 import { LeadDeleteDialog } from '#/modules/leads/components/LeadDeleteDialog';
-import { Leads } from '#/modules/leads/services/leads';
+import { useLeadCrud } from '#/modules/leads/hooks/use-lead-crud';
 import { useDebounce } from '#/hooks/use-debounce';
 import { Badge } from '#/components/ui/badge';
 import { Button } from '#/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card';
 import { Input } from '#/components/ui/input';
+import { PaginationControls } from '#/components/ui/pagination-controls';
 import { Separator } from '#/components/ui/separator';
-import { Skeleton } from '#/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '#/components/ui/tabs';
 
 const modalityLabels = {
@@ -68,41 +67,7 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
       })
     : null;
 
-  // Form dialog state
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingLead, setEditingLead] = useState<{
-    id: string;
-    values: { name: string; last_name: string; email: string; program_id: string };
-  } | null>(null);
-
-  // Delete dialog state
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null);
-
-  const handleCreate = () => {
-    setEditingLead(null);
-    setFormOpen(true);
-  };
-
-  const handleEdit = async (id: string) => {
-    const lead = await Leads.getById(id);
-    if (!lead) return;
-    setEditingLead({
-      id,
-      values: {
-        name: lead.name,
-        last_name: lead.last_name,
-        email: lead.email,
-        program_id: lead.program_id,
-      },
-    });
-    setFormOpen(true);
-  };
-
-  const handleDelete = (id: string) => {
-    setDeletingLeadId(id);
-    setDeleteOpen(true);
-  };
+  const crud = useLeadCrud();
 
   const handleLeadsSearchChange = (value: string) => {
     setLeadsSearch(value);
@@ -134,53 +99,10 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
 
       {/* Info cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card size="sm">
-          <CardHeader className="flex-row items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Clock className="size-4" />
-            </div>
-            <div>
-              <CardTitle className="text-sm text-muted-foreground">Duracion</CardTitle>
-              <p className="font-heading text-lg font-bold">{program.duration_weeks} semanas</p>
-            </div>
-          </CardHeader>
-        </Card>
-
-        <Card size="sm">
-          <CardHeader className="flex-row items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <MapPin className="size-4" />
-            </div>
-            <div>
-              <CardTitle className="text-sm text-muted-foreground">Modalidad</CardTitle>
-              <p className="font-heading text-lg font-bold">{modalityLabels[program.modality]}</p>
-            </div>
-          </CardHeader>
-        </Card>
-
-        <Card size="sm">
-          <CardHeader className="flex-row items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <GraduationCap className="size-4" />
-            </div>
-            <div>
-              <CardTitle className="text-sm text-muted-foreground">Nivel</CardTitle>
-              <p className="font-heading text-lg font-bold capitalize">{program.level}</p>
-            </div>
-          </CardHeader>
-        </Card>
-
-        <Card size="sm">
-          <CardHeader className="flex-row items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Users className="size-4" />
-            </div>
-            <div>
-              <CardTitle className="text-sm text-muted-foreground">Leads registrados</CardTitle>
-              <p className="font-heading text-lg font-bold">{leadsTotal}</p>
-            </div>
-          </CardHeader>
-        </Card>
+        <InfoCard icon={Clock} label="Duracion" value={`${program.duration_weeks} semanas`} />
+        <InfoCard icon={MapPin} label="Modalidad" value={modalityLabels[program.modality]} />
+        <InfoCard icon={GraduationCap} label="Nivel" value={program.level} capitalize />
+        <InfoCard icon={Users} label="Leads registrados" value={String(leadsTotal)} />
       </div>
 
       {/* Tabs */}
@@ -262,7 +184,7 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
                 onChange={(e) => handleLeadsSearchChange(e.target.value)}
               />
             </div>
-            <Button variant="gold" size="sm" onClick={handleCreate}>
+            <Button variant="gold" size="sm" onClick={crud.handleCreate}>
               <Plus className="size-4" />
               Agregar Lead
             </Button>
@@ -292,7 +214,9 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
                 </thead>
                 <tbody className="divide-y">
                   {leadsLoading &&
-                    Array.from({ length: 5 }).map((_, i) => <LeadRowSkeleton key={i} />)}
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <LeadRowSkeleton key={i} columns={4} />
+                    ))}
 
                   {!leadsLoading &&
                     leads.map((lead) => (
@@ -300,8 +224,8 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
                         key={lead.id}
                         lead={lead}
                         showProgram={false}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
+                        onEdit={crud.handleEdit}
+                        onDelete={crud.handleDelete}
                       />
                     ))}
 
@@ -316,83 +240,60 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
               </table>
             </div>
 
-            {/* Pagination */}
-            {leadsTotalPages > 0 && (
-              <div className="flex items-center justify-between border-t px-4 py-3">
-                <p className="text-sm text-muted-foreground">
-                  Mostrando {leadsPage * LEADS_PER_PAGE + 1}-
-                  {Math.min((leadsPage + 1) * LEADS_PER_PAGE, leadsTotal)} de {leadsTotal} leads
-                </p>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="outline"
-                    size="icon-xs"
-                    disabled={leadsPage === 0}
-                    onClick={() => setLeadsPage((p) => p - 1)}
-                  >
-                    <ChevronLeft className="size-4" />
-                  </Button>
-                  {Array.from({ length: leadsTotalPages }, (_, i) => i).map((page) => (
-                    <Button
-                      key={page}
-                      variant={page === leadsPage ? 'default' : 'ghost'}
-                      size="icon-xs"
-                      onClick={() => setLeadsPage(page)}
-                    >
-                      {page + 1}
-                    </Button>
-                  ))}
-                  <Button
-                    variant="outline"
-                    size="icon-xs"
-                    disabled={leadsPage === leadsTotalPages - 1}
-                    onClick={() => setLeadsPage((p) => p + 1)}
-                  >
-                    <ChevronRight className="size-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
+            <PaginationControls
+              currentPage={leadsPage}
+              totalPages={leadsTotalPages}
+              totalItems={leadsTotal}
+              pageSize={LEADS_PER_PAGE}
+              onPageChange={setLeadsPage}
+              label="leads"
+            />
           </div>
         </TabsContent>
       </Tabs>
 
       {/* Dialogs */}
       <LeadFormDialog
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        leadId={editingLead?.id}
+        open={crud.formOpen}
+        onOpenChange={crud.setFormOpen}
+        leadId={crud.editingLead?.id}
         defaultProgramId={eventId}
-        defaultValues={editingLead?.values}
+        defaultValues={crud.editingLead?.values}
       />
 
       <LeadDeleteDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        leadId={deletingLeadId}
+        open={crud.deleteOpen}
+        onOpenChange={crud.setDeleteOpen}
+        leadId={crud.deletingLeadId}
       />
     </div>
   );
 }
 
-function LeadRowSkeleton() {
+function InfoCard({
+  icon: Icon,
+  label,
+  value,
+  capitalize,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  capitalize?: boolean;
+}) {
   return (
-    <tr>
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-3">
-          <Skeleton className="size-9 rounded-full" />
-          <Skeleton className="h-4 w-32" />
+    <Card size="sm">
+      <CardHeader className="flex-row items-center gap-3">
+        <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="size-4" />
         </div>
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-4 w-40" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-4 w-24" />
-      </td>
-      <td className="px-4 py-3 text-right">
-        <Skeleton className="ml-auto size-6 rounded" />
-      </td>
-    </tr>
+        <div>
+          <CardTitle className="text-sm text-muted-foreground">{label}</CardTitle>
+          <p className={`font-heading text-lg font-bold ${capitalize ? 'capitalize' : ''}`}>
+            {value}
+          </p>
+        </div>
+      </CardHeader>
+    </Card>
   );
 }
