@@ -1,201 +1,116 @@
-Welcome to your new TanStack Start app!
+# Javeriana Lead & Events Manager
 
-# Getting Started
+Dashboard administrativo para la gestión de programas académicos y leads (aspirantes interesados) de la Pontificia Universidad Javeriana.
 
-To run this application:
+## Requisitos previos
 
-```bash
-npm install
-npm run dev
-```
+- [Node.js](https://nodejs.org/) v18 o superior
+- [pnpm](https://pnpm.io/) (o npm)
+- Una cuenta en [Supabase](https://supabase.com/) con el proyecto configurado
 
-# Building For Production
+## Instalación y ejecución local
 
-To build this application for production:
-
-```bash
-npm run build
-```
-
-## Testing
-
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+1. Clonar el repositorio:
 
 ```bash
-npm run test
+git clone <url-del-repositorio>
+cd javeriana-events-manager
 ```
 
-## Styling
-
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `npm install @tailwindcss/vite tailwindcss -D`
-
-## Linting & Formatting
-
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
+2. Instalar dependencias:
 
 ```bash
-npm run lint
-npm run format
-npm run check
+pnpm install
 ```
 
-## Routing
+3. Configurar las variables de entorno. Crear un archivo `.env` en la raíz del proyecto:
 
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from '@tanstack/react-router';
+```env
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+VITE_SUPABASE_KEY=tu-anon-key
 ```
 
-Then anywhere in your JSX you can use it like so:
+4. Ejecutar en modo desarrollo:
 
-```tsx
-<Link to="/about">About</Link>
+```bash
+pnpm dev
 ```
 
-This will create a link that will navigate to the `/about` route.
+La aplicación estará disponible en `http://localhost:3000`.
 
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
+5. Build de producción:
 
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-});
+```bash
+pnpm build
+pnpm preview
 ```
 
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
+## Estructura del proyecto
 
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start';
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString();
-});
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('');
-
-  useEffect(() => {
-    getServerTime().then(setTime);
-  }, []);
-
-  return <div>Server time: {time}</div>;
-}
+```
+src/
+├── components/          # Componentes reutilizables
+│   ├── app/             # Componentes de la app (sidebar)
+│   ├── form/            # Componentes de formulario (TextField, SelectField, SubmitButton)
+│   ├── layout/          # Layout principal (AdminLayout)
+│   └── ui/              # Componentes base de shadcn/ui
+├── constants/           # Constantes globales (query keys)
+├── hooks/               # Hooks personalizados (useDebounce, useTheme, form context)
+├── integrations/        # Integraciones externas (Supabase, TanStack Query provider)
+├── modules/
+│   ├── events/          # Módulo de programas académicos
+│   │   ├── components/  # ProgramCard, FeaturedProgramCard
+│   │   ├── models/      # Tipos de la entidad
+│   │   ├── pages/       # Catálogo y detalle de programa
+│   │   ├── query-options/ # Opciones de query (infiniteQuery, queryOptions)
+│   │   └── services/    # Servicio de comunicación con Supabase
+│   └── leads/           # Módulo de leads/aspirantes
+│       ├── components/  # LeadRow, LeadFormDialog, LeadDeleteDialog
+│       ├── hooks/       # useLeadCrud (lógica CRUD compartida)
+│       ├── models/      # Tipos de la entidad
+│       ├── pages/       # Panel de leads
+│       ├── query-options/
+│       └── services/    # Servicio de comunicación con Supabase
+├── routes/              # Rutas basadas en archivos (TanStack Router)
+└── styles.css           # Estilos globales y tokens de diseño
 ```
 
-## API Routes
+## Decisiones técnicas
 
-You can create API routes by using the `server` property in your route definitions:
+### Stack principal
 
-```tsx
-import { createFileRoute } from '@tanstack/react-router';
-import { json } from '@tanstack/react-start';
+- **React 19** con **Vite** como bundler. Se eligió Vite por su velocidad en desarrollo y su ecosistema de plugins.
+- **TypeScript** para tener tipado estricto y reducir errores en tiempo de desarrollo.
 
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-});
-```
+### Routing
 
-## Data Fetching
+- **TanStack Router** con file-based routing. Cada archivo en `src/routes/` genera una ruta automáticamente. Se usó en vez de React Router porque ofrece tipado end-to-end en parámetros de ruta y search params sin configuración extra.
 
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
+### Data fetching y estado del servidor
 
-For example:
+- **TanStack Query** para todo el manejo de datos del servidor. Se aprovechan features como `keepPreviousData` para transiciones suaves entre filtros, `infiniteQueryOptions` para el infinite scroll del catálogo, y query keys que incluyen los filtros para mantener cache granular.
+- Los servicios (`Events`, `Leads`) encapsulan las llamadas a Supabase y se consumen desde los query options, separando la lógica de fetching de los componentes.
 
-```tsx
-import { createFileRoute } from '@tanstack/react-router';
+### Formularios
 
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people');
-    return response.json();
-  },
-  component: PeopleComponent,
-});
+- **TanStack Form** con `createFormHook` para generar un hook tipado (`useAppForm`) que inyecta los componentes de campo (TextField, SelectField) y de formulario (SubmitButton) por contexto. Esto permite reutilizar la misma estructura de form sin prop drilling y con validación integrada.
 
-function PeopleComponent() {
-  const data = Route.useLoaderData();
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  );
-}
-```
+### Base de datos
 
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
+- **Supabase** como backend. Se usa el cliente JS para queries directas con filtros server-side (`.ilike()`, `.or()`, `.range()`, `.eq()`). Los tipos de la base de datos se generan automáticamente con `supabase gen types` y se importan en los modelos.
 
-# Demo files
+### UI y estilos
 
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
+- **shadcn/ui** como sistema de componentes base (Card, Dialog, Button, Select, Tabs, etc.). No es una librería instalada como dependencia sino componentes copiados al proyecto, lo que permite modificarlos libremente.
+- **Tailwind CSS v4** con tokens de color en OKLCH. Se agregó un token `--gold` para el branding de la universidad.
+- **Modo oscuro** implementado con Context API (`ThemeProvider`), persistido en `localStorage` y con detección de preferencia del sistema.
 
-# Learn More
+### Notificaciones
 
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+- **Sonner** para toasts de feedback en operaciones CRUD (crear, editar, eliminar leads). Se integra con el theme context para respetar el modo claro/oscuro.
 
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+### Arquitectura modular
+
+Se organizó el código por módulos (`events`, `leads`) donde cada uno tiene sus propios componentes, servicios, modelos y query options. Esto mantiene las responsabilidades separadas y hace que sea fácil escalar o agregar nuevos módulos sin afectar los existentes.
+
+Los hooks personalizados como `useLeadCrud` y `useDebounce` extraen lógica reutilizable que se comparte entre páginas, y componentes como `PaginationControls` y `LeadRowSkeleton` evitan duplicación de código.

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Leads } from '../services/leads';
 import { useAppForm } from '#/hooks/form';
 import { allProgramsQueryOptions } from '#/modules/events/query-options/events-options';
@@ -54,7 +55,11 @@ export function LeadFormDialog({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QueryKeys.LEADS] });
       queryClient.invalidateQueries({ queryKey: [QueryKeys.EVENTS, 'leads'] });
+      toast.success(isEditing ? 'Lead actualizado correctamente' : 'Lead creado correctamente');
       onOpenChange(false);
+    },
+    onError: () => {
+      toast.error('Ocurrio un error al guardar el lead');
     },
   });
 

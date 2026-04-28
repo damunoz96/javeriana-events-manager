@@ -4,6 +4,7 @@ import { StrictMode } from 'react';
 import { routeTree } from './routeTree.gen';
 import * as TanStackQueryProvider from './integrations/tanstack-query/root-provider.tsx';
 import { ThemeProvider } from './hooks/use-theme';
+import { Toaster } from './components/ui/sonner';
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
 const router = createRouter({
@@ -33,6 +34,7 @@ if (!rootElement.innerHTML) {
       <ThemeProvider>
         <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
           <RouterProvider router={router} />
+          <Toaster richColors position="bottom-right" />
         </TanStackQueryProvider.Provider>
       </ThemeProvider>
     </StrictMode>

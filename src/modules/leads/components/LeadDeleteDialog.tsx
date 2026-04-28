@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Leads } from '../services/leads';
 import { QueryKeys } from '#/constants/query-keys';
 import {
@@ -29,7 +30,11 @@ export function LeadDeleteDialog({ open, onOpenChange, leadId }: LeadDeleteDialo
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QueryKeys.LEADS] });
       queryClient.invalidateQueries({ queryKey: [QueryKeys.EVENTS, 'leads'] });
+      toast.success('Lead eliminado correctamente');
       onOpenChange(false);
+    },
+    onError: () => {
+      toast.error('Ocurrio un error al eliminar el lead');
     },
   });
 
