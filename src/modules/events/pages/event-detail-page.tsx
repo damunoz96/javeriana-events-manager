@@ -40,6 +40,7 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
   const [leadsSearch, setLeadsSearch] = useState('');
   const debouncedLeadsSearch = useDebounce(leadsSearch);
   const [leadsPage, setLeadsPage] = useState(0);
+  const crud = useLeadCrud();
 
   const {
     data: leadsData,
@@ -66,8 +67,6 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
         year: 'numeric',
       })
     : null;
-
-  const crud = useLeadCrud();
 
   const handleLeadsSearchChange = (value: string) => {
     setLeadsSearch(value);

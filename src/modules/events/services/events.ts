@@ -37,13 +37,11 @@ export class Events {
       .select('id, title')
       .order('title')
       .throwOnError();
-
-    return data ?? [];
+    return data;
   }
 
   static async getById(id: string) {
     const { data } = await supabase.from('programs').select().eq('id', id).single().throwOnError();
-
     return data;
   }
 
@@ -65,7 +63,7 @@ export class Events {
       .throwOnError();
 
     return {
-      data: leads ?? [],
+      data: leads,
       total: count ?? 0,
     };
   }

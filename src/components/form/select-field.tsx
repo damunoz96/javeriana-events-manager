@@ -26,7 +26,7 @@ export function SelectField({
     <div className="space-y-2">
       <Label htmlFor={field.name}>{label}</Label>
       <Select
-        value={field.state.value ?? ''}
+        value={field.state.value}
         onValueChange={(value) => field.handleChange(value)}
         disabled={disabled}
       >
@@ -41,9 +41,7 @@ export function SelectField({
           ))}
         </SelectContent>
       </Select>
-      {errors.length > 0 && (
-        <p className="text-xs text-destructive">{errors.join(', ')}</p>
-      )}
+      {errors.length > 0 && <p className="text-xs text-destructive">{errors.join(', ')}</p>}
     </div>
   );
 }

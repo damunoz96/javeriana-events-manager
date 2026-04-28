@@ -18,7 +18,6 @@ export function useLeadCrud() {
 
   const handleEdit = async (id: string) => {
     const lead = await Leads.getById(id);
-    if (!lead) return;
     setEditingLead({
       id,
       values: {

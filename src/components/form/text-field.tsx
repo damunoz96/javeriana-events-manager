@@ -21,14 +21,12 @@ export function TextField({
         id={field.name}
         type={type}
         placeholder={placeholder}
-        value={field.state.value ?? ''}
+        value={field.state.value}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
         aria-invalid={errors.length > 0}
       />
-      {errors.length > 0 && (
-        <p className="text-xs text-destructive">{errors.join(', ')}</p>
-      )}
+      {errors.length > 0 && <p className="text-xs text-destructive">{errors.join(', ')}</p>}
     </div>
   );
 }

@@ -43,7 +43,7 @@ export function LeadRow({ lead, showProgram = true, onEdit, onDelete }: LeadRowP
       {showProgram && (
         <td className="px-4 py-3">
           {lead.programs ? (
-            <span className="inline-flex rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs font-medium">
+            <span className="inline-flex rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap">
               {lead.programs.title}
             </span>
           ) : (

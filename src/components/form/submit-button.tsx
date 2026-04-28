@@ -1,17 +1,16 @@
 import { useFormContext } from '#/hooks/form-context';
 import { Button } from '#/components/ui/button';
 
-export function SubmitButton({
-  label,
-  pendingLabel,
-}: {
-  label: string;
-  pendingLabel?: string;
-}) {
+export function SubmitButton({ label, pendingLabel }: { label: string; pendingLabel?: string }) {
   const form = useFormContext();
 
   return (
-    <form.Subscribe selector={(state: { canSubmit: boolean; isSubmitting: boolean }) => [state.canSubmit, state.isSubmitting]}>
+    <form.Subscribe
+      selector={(state: { canSubmit: boolean; isSubmitting: boolean }) => [
+        state.canSubmit,
+        state.isSubmitting,
+      ]}
+    >
       {(state) => {
         const [canSubmit, isSubmitting] = state;
         return (

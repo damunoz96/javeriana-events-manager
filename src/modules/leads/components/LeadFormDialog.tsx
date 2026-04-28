@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { Leads } from '../services/leads';
 import { useAppForm } from '#/hooks/form';
@@ -46,7 +46,12 @@ export function LeadFormDialog({
   const programOptions = programs.map((p) => ({ value: p.id, label: p.title }));
 
   const mutation = useMutation({
-    mutationFn: async (data: { name: string; last_name: string; email: string; program_id: string }) => {
+    mutationFn: async (data: {
+      name: string;
+      last_name: string;
+      email: string;
+      program_id: string;
+    }) => {
       return Leads.upsert({
         ...(leadId ? { id: leadId } : {}),
         ...data,
@@ -65,10 +70,10 @@ export function LeadFormDialog({
 
   const form = useAppForm({
     defaultValues: {
-      name: '',
-      last_name: '',
-      email: '',
-      program_id: defaultProgramId ?? '',
+      name: defaultValues?.name ?? '',
+      last_name: defaultValues?.last_name ?? '',
+      email: defaultValues?.email ?? '',
+      program_id: defaultValues?.program_id ?? defaultProgramId ?? '',
     },
     onSubmit: async ({ value }) => {
       await mutation.mutateAsync(value);
@@ -76,19 +81,8 @@ export function LeadFormDialog({
   });
 
   useEffect(() => {
-    if (!open) return;
-
-    if (defaultValues) {
-      form.reset(defaultValues);
-    } else {
-      form.reset({
-        name: '',
-        last_name: '',
-        email: '',
-        program_id: defaultProgramId ?? '',
-      });
-    }
-  }, [open, defaultValues, defaultProgramId]);
+    if (!open) form.reset();
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

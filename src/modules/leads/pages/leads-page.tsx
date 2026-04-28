@@ -18,6 +18,7 @@ export function LeadsPage() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search);
   const [currentPage, setCurrentPage] = useState(0);
+  const crud = useLeadCrud();
 
   const { data, isLoading, isFetching } = useQuery(leadsQueryOptions(debouncedSearch, currentPage));
 
@@ -25,8 +26,6 @@ export function LeadsPage() {
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / LEADS_PAGE_SIZE);
   const isFiltering = isFetching && !isLoading;
-
-  const crud = useLeadCrud();
 
   const handleSearchChange = (value: string) => {
     setSearch(value);

@@ -13,7 +13,8 @@ function DashboardHome() {
           Bienvenido al panel de administracion
         </h2>
         <p className="text-lg text-muted-foreground">
-          Gestiona la oferta academica y el registro de leads de la Pontificia Universidad Javeriana.
+          Gestiona la oferta academica y el registro de leads de la Pontificia Universidad
+          Javeriana.
         </p>
       </section>
 
@@ -48,7 +49,6 @@ function DashboardHome() {
           </p>
         </Link>
       </div>
-
     </div>
   );
 }

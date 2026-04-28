@@ -25,7 +25,7 @@ export function EventsPage() {
     useInfiniteQuery(eventsQueryOptions(activeLevel, debouncedSearch));
 
   const programs = data?.pages.flatMap((page) => page.data) ?? [];
-  const featured = programs[0];
+  const featured = programs.at(0);
   const rest = programs.slice(1);
   const isInitialLoading = isLoading;
   const isFiltering = isFetching && !isFetchingNextPage && !isLoading;
@@ -135,7 +135,7 @@ export function EventsPage() {
 function ProgramCardSkeleton() {
   return (
     <Card className="pt-0 overflow-hidden">
-      <Skeleton className="aspect-[4/3] w-full rounded-none" />
+      <Skeleton className="aspect-4/3 w-full rounded-none" />
       <div className="space-y-3 p-4">
         <Skeleton className="h-5 w-3/4" />
         <Skeleton className="h-4 w-full" />
@@ -152,7 +152,7 @@ function ProgramCardSkeleton() {
 function FeaturedCardSkeleton() {
   return (
     <Card className="overflow-hidden pt-0 sm:flex-row sm:py-0">
-      <Skeleton className="aspect-[4/3] w-full rounded-none sm:aspect-auto sm:h-[320px] sm:w-1/2" />
+      <Skeleton className="aspect-4/3 w-full rounded-none sm:aspect-auto sm:h-80 sm:w-1/2" />
       <div className="flex flex-1 flex-col justify-center space-y-4 p-6">
         <Skeleton className="h-3 w-24" />
         <Skeleton className="h-7 w-3/4" />

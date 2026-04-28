@@ -13,7 +13,7 @@ export function ProgramCard({ program }: { program: Event }) {
   return (
     <Link to="/dashboard/events/$eventId" params={{ eventId: program.id }} className="block">
       <Card className="group cursor-pointer pt-0 transition-all hover:shadow-md">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
+        <div className="relative aspect-4/3 overflow-hidden rounded-t-xl">
           <img
             src={program.cover_image_url}
             alt={program.title}
@@ -23,7 +23,7 @@ export function ProgramCard({ program }: { program: Event }) {
             height={300}
             className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
           <span className="absolute left-3 top-3 rounded-full bg-primary/90 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-primary-foreground">
             {program.category}
           </span>
@@ -69,7 +69,7 @@ export function FeaturedProgramCard({ program }: { program: Event }) {
   return (
     <Link to="/dashboard/events/$eventId" params={{ eventId: program.id }} className="block">
       <Card className="group cursor-pointer pt-0 transition-all hover:shadow-md sm:flex-row sm:overflow-hidden sm:py-0">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl sm:aspect-auto sm:h-[320px] sm:w-1/2 sm:shrink-0 sm:rounded-l-xl sm:rounded-tr-none">
+        <div className="relative aspect-4/3 overflow-hidden rounded-t-xl sm:aspect-auto sm:h-80 sm:w-1/2 sm:shrink-0 sm:rounded-l-xl sm:rounded-tr-none">
           <img
             src={program.cover_image_url}
             alt={program.title}
@@ -80,7 +80,7 @@ export function FeaturedProgramCard({ program }: { program: Event }) {
             height={320}
             className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-black/20 to-transparent" />
           <span className="absolute left-3 top-3 rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-gold-foreground">
             Destacado
           </span>
